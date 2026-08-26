@@ -8,6 +8,7 @@ import {
   ClasificacionSection,
   DatosGeneralesSection,
   LegalFinancieroSection,
+  NetelSection,
   PuntuacionSection,
   SeguimientoSection,
 } from "./CompanySections";
@@ -32,6 +33,7 @@ export default async function CompanyForm({ company }: { company?: Company }) {
         <DatosGeneralesSection company={company} />
         <ClasificacionSection company={company} existingTags={existingTags} />
         <PuntuacionSection company={company} companyId={company?.id} />
+        <NetelSection company={company} companyId={company?.id} />
         <SeguimientoSection company={company} estados={estados} />
         <LegalFinancieroSection
           company={company}

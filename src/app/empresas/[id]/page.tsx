@@ -16,6 +16,7 @@ import {
   ClasificacionSection,
   DatosGeneralesSection,
   LegalFinancieroSection,
+  NetelSection,
   PuntuacionSection,
   SeguimientoSection,
 } from "../CompanySections";
@@ -147,6 +148,11 @@ export default async function CompanyDetailPage({
                 plazosPago={plazosPago}
               />
             ),
+          },
+          {
+            key: "netel",
+            label: "NETEL",
+            content: <NetelSection company={company} companyId={companyId} />,
           },
           {
             key: "reuniones",

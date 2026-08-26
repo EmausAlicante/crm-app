@@ -66,6 +66,17 @@ function buildInput(formData: FormData): CompanyInput {
     // A manual save always counts as confirming the record, clearing the
     // "AI estimate, not yet reviewed" flag regardless of which tab was edited.
     scoreEstimadoIa: false,
+    // --- Módulo NETEL ---
+    netelPrioridad: str(formData, "netelPrioridad"),
+    netelScore: num(formData, "netelScore"),
+    netelEstrategiaEntrada: str(formData, "netelEstrategiaEntrada"),
+    netelArgumento: str(formData, "netelArgumento"),
+    netelObjecionProbable: str(formData, "netelObjecionProbable"),
+    netelRespuestaSugerida: str(formData, "netelRespuestaSugerida"),
+    netelPreguntaRecepcion: str(formData, "netelPreguntaRecepcion"),
+    nivelInvestigacion: str(formData, "nivelInvestigacion"),
+    fuenteInvestigacion: str(formData, "fuenteInvestigacion"),
+    fechaVerificacionInvestigacion: str(formData, "fechaVerificacionInvestigacion"),
   } as CompanyInput;
 
   for (const { key } of ESPECIALIZACIONES) input[key] = bool(formData, key);

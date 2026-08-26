@@ -1,4 +1,14 @@
-import { ESPECIALIZACIONES, JORNADAS, MARCAS, SCORE_FIELDS, ZONAS } from "@/lib/constants";
+import {
+  ESPECIALIZACIONES,
+  JORNADAS,
+  MARCAS,
+  NETEL_ESTRATEGIAS,
+  NETEL_PRIORIDADES,
+  NETEL_PRIORIDAD_STYLES,
+  NIVELES_INVESTIGACION,
+  SCORE_FIELDS,
+  ZONAS,
+} from "@/lib/constants";
 import type { Company } from "@/lib/types";
 import { anthropicConfigured } from "@/lib/ai/anthropic";
 import { COMPANY_FORM_ID, Checkbox, Field, Section, TextArea } from "./formFields";
@@ -9,6 +19,7 @@ import {
   saveLopdDocumentoUrlAction,
 } from "./mediaActions";
 import { estimateScoreAction } from "./scoreActions";
+import { recalcularNetelScoreAction } from "./netelActions";
 import DocumentUploader from "./DocumentUploader";
 import ClasificacionTagPicker from "./ClasificacionTagPicker";
 
@@ -310,6 +321,118 @@ export function LegalFinancieroSection({
             El documento LOPD se podrá subir en cuanto crees la empresa.
           </p>
         )}
+      </div>
+    </Section>
+  );
+}
+
+// --- Módulo NETEL: prospección comercial de distribuidores ---
+// (ver informe-crm-app.md / propuesta-modulo-netel.md)
+export function NetelSection({ company, companyId }: { company?: Company; companyId?: number }) {
+  return (
+    <Section title="Inteligencia NETEL">
+      <div className="flex items-end gap-3 flex-wrap">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-slate-600">Prioridad</span>
+          <select
+            form={COMPANY_FORM_ID}
+            name="netelPrioridad"
+            defaultValue={company?.netelPrioridad ?? ""}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">— Sin calcular —</option>
+            {NETEL_PRIORIDADES.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Field
+          label="Score NETEL (0-100)"
+          name="netelScore"
+          type="number"
+          defaultValue={company?.netelScore ?? undefined}
+        />
+        {company?.netelPrioridad && (
+          <span
+            className={`text-xs font-medium rounded-full px-3 py-1.5 mb-0.5 ${
+              NETEL_PRIORIDAD_STYLES[company.netelPrioridad] ?? "bg-slate-100 text-slate-500"
+            }`}
+          >
+            {company.netelPrioridad}
+          </span>
+        )}
+        {companyId != null && (
+          <form action={recalcularNetelScoreAction}>
+            <input type="hidden" name="companyId" value={companyId} />
+            <button type="submit" className="text-sm text-blue-600 hover:underline pb-2.5">
+              Recalcular a partir de la ficha
+            </button>
+          </form>
+        )}
+      </div>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="text-slate-600">Estrategia de entrada</span>
+        <select
+          form={COMPANY_FORM_ID}
+          name="netelEstrategiaEntrada"
+          defaultValue={company?.netelEstrategiaEntrada ?? ""}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        >
+          <option value="">—</option>
+          {NETEL_ESTRATEGIAS.map(({ key, label }) => (
+            <option key={key} value={key}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <TextArea label="Argumento NETEL personalizado" name="netelArgumento" defaultValue={company?.netelArgumento} />
+      <div className="grid sm:grid-cols-2 gap-4">
+        <TextArea
+          label="Objeción probable"
+          name="netelObjecionProbable"
+          defaultValue={company?.netelObjecionProbable}
+        />
+        <TextArea
+          label="Respuesta sugerida"
+          name="netelRespuestaSugerida"
+          defaultValue={company?.netelRespuestaSugerida}
+        />
+      </div>
+      <Field
+        label="Pregunta para recepción"
+        name="netelPreguntaRecepcion"
+        defaultValue={company?.netelPreguntaRecepcion}
+      />
+
+      <div className="border-t border-slate-100 pt-4 grid sm:grid-cols-2 gap-4">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="text-slate-600">Nivel de investigación</span>
+          <select
+            form={COMPANY_FORM_ID}
+            name="nivelInvestigacion"
+            defaultValue={company?.nivelInvestigacion ?? ""}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          >
+            <option value="">—</option>
+            {NIVELES_INVESTIGACION.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Field label="Fuente de investigación" name="fuenteInvestigacion" defaultValue={company?.fuenteInvestigacion} />
+        <Field
+          label="Fecha de verificación"
+          name="fechaVerificacionInvestigacion"
+          type="date"
+          defaultValue={company?.fechaVerificacionInvestigacion ?? undefined}
+        />
       </div>
     </Section>
   );
