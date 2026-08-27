@@ -12,6 +12,7 @@ import { enrichCompanyContactData } from "@/lib/ai/leadEnrichment";
 import { estimateLeadScore } from "@/lib/ai/leadScoring";
 import { calculateNetelScore, netelPrioridadFromScore, MARCAS } from "@/lib/constants";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { insertSaneamientoLog } from "@/lib/saneamientoLog";
 
 export type SaneamientoItemResult = {
   id: number;
@@ -94,6 +95,13 @@ export async function sanearLoteAction(batchSize: number): Promise<SaneamientoLo
       result.error = e instanceof Error ? e.message : "Error desconocido";
     }
     procesadas.push(result);
+    await insertSaneamientoLog({
+      companyId: result.id,
+      empresa: result.empresa,
+      investigada: result.investigada,
+      valorada: result.valorada,
+      error: result.error,
+    });
   }
 
   revalidatePath("/saneamiento");

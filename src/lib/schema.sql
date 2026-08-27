@@ -371,6 +371,20 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   last_run  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Registro de la pantalla de Saneamiento (Fase 1 del plan de agentes
+-- proactivos): qué se tocó en cada empresa en cada lote, para que el
+-- historial no dependa del estado del navegador y se pueda consultar en
+-- cualquier momento, incluso tras navegar a otra pantalla.
+CREATE TABLE IF NOT EXISTS saneamiento_log (
+  id          SERIAL PRIMARY KEY,
+  company_id  INTEGER NOT NULL,
+  empresa     TEXT NOT NULL,
+  investigada BOOLEAN NOT NULL DEFAULT false,
+  valorada    BOOLEAN NOT NULL DEFAULT false,
+  error       TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- Access gate (src/lib/auth.ts): one-time codes emailed/texted to the owner's
 -- registered contact info instead of a static shared code — nothing to
 -- remember or leak. Destinations live in app_settings (single-row app-wide

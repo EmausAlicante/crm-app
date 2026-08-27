@@ -2,14 +2,41 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { sanearLoteAction, type SaneamientoItemResult } from "./saneamientoActions";
+import { sanearLoteAction } from "./saneamientoActions";
+import type { SaneamientoLogEntry } from "@/lib/saneamientoLog";
 
-export default function SaneamientoClient({ pendientesInicial }: { pendientesInicial: number }) {
+type HistorialItem = {
+  id: number;
+  empresa: string;
+  investigada: boolean;
+  valorada: boolean;
+  error: string | null;
+  createdAt?: string;
+};
+
+function fromLog(entries: SaneamientoLogEntry[]): HistorialItem[] {
+  return entries.map((e) => ({
+    id: e.companyId,
+    empresa: e.empresa,
+    investigada: e.investigada,
+    valorada: e.valorada,
+    error: e.error,
+    createdAt: e.createdAt,
+  }));
+}
+
+export default function SaneamientoClient({
+  pendientesInicial,
+  historialInicial,
+}: {
+  pendientesInicial: number;
+  historialInicial: SaneamientoLogEntry[];
+}) {
   const [pendientes, setPendientes] = useState(pendientesInicial);
   const [batchSize, setBatchSize] = useState(5);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [historial, setHistorial] = useState<SaneamientoItemResult[]>([]);
+  const [historial, setHistorial] = useState<HistorialItem[]>(fromLog(historialInicial));
 
   async function handleLote() {
     setLoading(true);
@@ -73,6 +100,9 @@ export default function SaneamientoClient({ pendientesInicial }: { pendientesIni
       {historial.length > 0 && (
         <section className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col gap-3">
           <h2 className="font-medium text-slate-800">Últimos procesados</h2>
+          <p className="text-xs text-slate-500 -mt-2">
+            Este historial se guarda en la base de datos, así que sigue aquí aunque navegues a otra pantalla.
+          </p>
           <ul className="flex flex-col gap-2">
             {historial.map((item, i) => (
               <li
@@ -80,9 +110,21 @@ export default function SaneamientoClient({ pendientesInicial }: { pendientesIni
                 className="flex items-start gap-3 rounded-lg border border-slate-100 p-3 text-sm"
               >
                 <div className="min-w-0 flex-1">
-                  <Link href={`/empresas/${item.id}`} className="font-medium text-slate-800 hover:underline">
-                    {item.empresa}
-                  </Link>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link href={`/empresas/${item.id}`} className="font-medium text-slate-800 hover:underline">
+                      {item.empresa}
+                    </Link>
+                    {item.createdAt && (
+                      <span className="text-xs text-slate-400">
+                        {new Date(item.createdAt).toLocaleString("es-ES", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-slate-500 mt-0.5">
                     {item.investigada && <span className="mr-2">✓ datos investigados</span>}
                     {item.valorada && <span className="mr-2">✓ valorada</span>}

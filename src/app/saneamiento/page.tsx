@@ -1,11 +1,12 @@
 import { anthropicConfigured } from "@/lib/ai/anthropic";
 import { countIncompleteCompanies } from "@/lib/companies";
+import { listRecentSaneamientoLog } from "@/lib/saneamientoLog";
 import SaneamientoClient from "./SaneamientoClient";
 
 export const dynamic = "force-dynamic";
 
 export default async function SaneamientoPage() {
-  const pendientes = await countIncompleteCompanies();
+  const [pendientes, historial] = await Promise.all([countIncompleteCompanies(), listRecentSaneamientoLog(30)]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -22,7 +23,7 @@ export default async function SaneamientoPage() {
           Falta configurar ANTHROPIC_API_KEY para poder investigar y valorar. Añádela a las variables de entorno.
         </p>
       ) : (
-        <SaneamientoClient pendientesInicial={pendientes} />
+        <SaneamientoClient pendientesInicial={pendientes} historialInicial={historial} />
       )}
     </div>
   );
