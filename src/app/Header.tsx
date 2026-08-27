@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/empresas", label: "Empresas" },
   { href: "/rutas", label: "Rutas" },
   { href: "/prospeccion", label: "Prospección" },
+  { href: "/saneamiento", label: "Saneamiento" },
   { href: "/emails", label: "Emails" },
   { href: "/facturacion", label: "Facturación" },
   { href: "/documentos", label: "Documentos" },

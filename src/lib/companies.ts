@@ -181,6 +181,48 @@ export async function listCompanies(filters: CompanyFilters = {}): Promise<Compa
   return rows.map(rowToCompany);
 }
 
+// Fase 1 del plan de agentes proactivos: leads que se colaron sin datos clave
+// (nunca se investigaron a fondo) o sin valoración todavía. Es la cola que
+// alimenta la pantalla de Saneamiento.
+export type IncompleteCompany = {
+  id: number;
+  empresa: string;
+  faltaWeb: boolean;
+  faltaTelefono: boolean;
+  faltaDireccion: boolean;
+  faltaValoracion: boolean;
+};
+
+export async function countIncompleteCompanies(): Promise<number> {
+  await schemaReady;
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS c FROM companies
+     WHERE web IS NULL OR web = '' OR telefono IS NULL OR telefono = ''
+        OR direccion IS NULL OR direccion = '' OR valoracion IS NULL`
+  );
+  return rows[0]?.c ?? 0;
+}
+
+export async function listIncompleteCompanies(limit: number): Promise<IncompleteCompany[]> {
+  await schemaReady;
+  const { rows } = await pool.query(
+    `SELECT id, empresa, web, telefono, direccion, valoracion FROM companies
+     WHERE web IS NULL OR web = '' OR telefono IS NULL OR telefono = ''
+        OR direccion IS NULL OR direccion = '' OR valoracion IS NULL
+     ORDER BY updated_at ASC
+     LIMIT $1`,
+    [limit]
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    empresa: r.empresa,
+    faltaWeb: !r.web,
+    faltaTelefono: !r.telefono,
+    faltaDireccion: !r.direccion,
+    faltaValoracion: r.valoracion === null,
+  }));
+}
+
 export async function listDistinctProvincias(): Promise<string[]> {
   await schemaReady;
   const { rows } = await pool.query(
